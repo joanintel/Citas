@@ -9,18 +9,38 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mis Citas">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
   <div class="phone" id="appContainer">
     <div class="header" id="appHeader">
-      <div class="menu-icon" id="menuInfoBtn">☰</div>
+      <div class="menu-icon" id="menuIcon">☰</div>
       <div class="add-area" id="openAddBtn">
         <div class="add-circle">+</div>
         <div class="add-label">Nueva cita</div>
       </div>
       <div class="title">Mis Citas</div>
       <div class="user-greeting" id="userGreeting"></div>
+    </div>
+
+    <!-- Menu Panel -->
+    <div id="menuPanel" class="menu-panel">
+      <div class="menu-overlay" id="menuOverlay"></div>
+      <div class="menu-content">
+        <div class="menu-header">
+          <h3>Menú</h3>
+          <button id="closeMenuBtn" class="close-menu">✕</button>
+        </div>
+        <div class="menu-item" id="themeOption">
+          <span>🌓 Tema oscuro/claro</span>
+          <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <div class="content" id="appointmentsList">
@@ -45,10 +65,10 @@
   <div id="appointmentModal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
       <h3 id="appModalTitle">➕ Nueva cita</h3>
-      <input type="text" id="appTitle" placeholder="Motivo De Cita*" autocomplete="off">
-      <input type="text" id="appDoctor" placeholder="Lugar" autocomplete="off">
-      <textarea id="appNotes" rows="3" placeholder="Descripcion(opcional)"></textarea>
-      <input type="date" id="appDate">
+      <input type="text" id="appTitle" placeholder="Motivo / título *" autocomplete="off">
+      <input type="text" id="appDoctor" placeholder="Doctor / Centro" autocomplete="off">
+      <textarea id="appNotes" rows="3" placeholder="Notas / apuntes (opcional)"></textarea>
+      <input type="date" id="appDate" lang="es">
       <input type="time" id="appTime">
       <div class="modal-buttons">
         <button id="modalCancelBtn" class="cancel-btn">Cancelar</button>

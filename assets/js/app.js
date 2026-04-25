@@ -1,10 +1,9 @@
-// assets/js/app.js - Clean fixed version, no double events
+// assets/js/app.js - with menu and theme
 (function() {
   let appointments = [];
   let userName = "";
   let currentEditId = null;
   
-  // Helper for mobile touch + click (prevents double firing)
   function on(el, handler) {
     if (!el) return;
     let isProcessing = false;
@@ -21,6 +20,49 @@
     el.removeEventListener('touchstart', wrappedHandler);
     el.addEventListener('click', wrappedHandler);
     el.addEventListener('touchstart', wrappedHandler);
+  }
+  
+  // Theme handling
+  function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      if (themeToggle) themeToggle.checked = true;
+    }
+    
+    if (themeToggle) {
+      themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.body.classList.add('dark-mode');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.body.classList.remove('dark-mode');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+    }
+  }
+  
+  // Menu handling
+  function initMenu() {
+    const menuIcon = document.getElementById('menuIcon');
+    const menuPanel = document.getElementById('menuPanel');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    
+    function openMenu() {
+      if (menuPanel) menuPanel.classList.add('open');
+    }
+    
+    function closeMenu() {
+      if (menuPanel) menuPanel.classList.remove('open');
+    }
+    
+    if (menuIcon) on(menuIcon, openMenu);
+    if (menuOverlay) on(menuOverlay, closeMenu);
+    if (closeMenuBtn) on(closeMenuBtn, closeMenu);
   }
   
   function loadData() {
@@ -54,10 +96,8 @@
     localStorage.setItem('mis_citas_appointments', JSON.stringify(appointments));
   }
   
-  // Save name button - CLEAN
   const saveNameBtn = document.getElementById('saveNameBtn');
   if (saveNameBtn) {
-    // Remove any existing listeners by cloning
     const newSaveBtn = saveNameBtn.cloneNode(true);
     saveNameBtn.parentNode.replaceChild(newSaveBtn, saveNameBtn);
     
@@ -83,7 +123,6 @@
     });
   }
   
-  // Add button - CLEAN
   const addBtn = document.getElementById('openAddBtn');
   if (addBtn) {
     const newAddBtn = addBtn.cloneNode(true);
@@ -111,7 +150,6 @@
     });
   }
   
-  // Cancel modal - CLEAN
   const cancelBtn = document.getElementById('modalCancelBtn');
   if (cancelBtn) {
     const newCancelBtn = cancelBtn.cloneNode(true);
@@ -124,7 +162,6 @@
     });
   }
   
-  // Save appointment - CLEAN
   const saveBtn = document.getElementById('modalSaveBtn');
   if (saveBtn) {
     const newSaveBtn = saveBtn.cloneNode(true);
@@ -252,15 +289,22 @@
     let formatted = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
     let opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
     
+    let cardClass = 'blue';
+    if (app.title.toLowerCase().includes('dentista') || app.title.toLowerCase().includes('dental')) {
+      cardClass = 'green';
+    } else if (app.title.toLowerCase().includes('corazón') || app.title.toLowerCase().includes('cardiologia')) {
+      cardClass = 'yellow';
+    }
+    
     return `
-      <div class="card blue" data-id="${app.id}" ${opacityStyle}>
+      <div class="card ${cardClass}" data-id="${app.id}" ${opacityStyle}>
         <div class="card-row">
           <div class="icon">📅</div>
           <div class="details">
             <div class="date">${formatted}</div>
             <div class="time">⏰ ${app.time || "12:00"}</div>
             <div class="doctor">👤 ${escapeHtml(app.doctor)}</div>
-            <div class="card-title" style="font-weight: bold; margin-top: 8px; font-size: 16px; color: #1a2342;">${escapeHtml(app.title)}</div>
+            <div class="card-title">${escapeHtml(app.title)}</div>
             ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
           </div>
           <div class="card-actions">
@@ -282,17 +326,7 @@
     });
   }
   
-  // Menu info button
-  const menuBtn = document.getElementById('menuInfoBtn');
-  if (menuBtn) {
-    const newMenuBtn = menuBtn.cloneNode(true);
-    menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
-    
-    on(newMenuBtn, function() {
-      alert(`📋 Mis Citas\nUsuario: ${userName || "invitado"}\nCitas guardadas: ${appointments.length}`);
-    });
-  }
-  
-  // Start the app
+  initTheme();
+  initMenu();
   loadData();
 })();

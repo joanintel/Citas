@@ -1,53 +1,69 @@
-// sw.js - Service Worker for PWA (offline caching)
-const CACHE_NAME = "mis-citas-v1";
+const CACHE_NAME = 'mis-citas-v3';
+
+// Files to cache
 const urlsToCache = [
-  "index.html",
-  "assets/css/style.css",
-  "assets/js/security.js",
-  "assets/js/app.js",
-  "assets/js/main.js",
-  "manifest.json",
-  "assets/icons/icon-72.png",
-  "assets/icons/icon-96.png",
-  "assets/icons/icon-128.png",
-  "assets/icons/icon-144.png",
-  "assets/icons/icon-152.png",
-  "assets/icons/icon-192.png",
-  "assets/icons/icon-384.png",
-  "assets/icons/icon-512.png"
+  'index.html',
+  'assets/css/style.css',
+  'assets/js/app.js',
+  'manifest.json'
 ];
 
-self.addEventListener("install", event => {
+// Install event - cache files
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
   );
   self.skipWaiting();
 });
 
-self.addEventListener("fetch", event => {
+// Fetch event - network first, then cache (better for privacy)
+self.addEventListener('fetch', event => {
+  // Skip cross-origin requests for privacy
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  // Don't cache non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) return response;
-      return fetch(event.request).then(fetchRes => {
-        if (!fetchRes || fetchRes.status !== 200) return fetchRes;
-        const copy = fetchRes.clone();
+    fetch(event.request)
+      .then(response => {
+        // Don't cache non-successful responses
+        if (!response || response.status !== 200) {
+          return response;
+        }
+        
+        // Cache the fetched response
+        const responseToCache = response.clone();
         caches.open(CACHE_NAME).then(cache => {
-          if (event.request.url.startsWith("http")) cache.put(event.request, copy);
+          cache.put(event.request, responseToCache);
         });
-        return fetchRes;
-      });
-    }).catch(() => {
-      if (event.request.mode === "navigate") return caches.match("index.html");
-      return new Response("Offline content not available", { status: 404 });
-    })
+        return response;
+      })
+      .catch(() => {
+        // Only use cache if network fails
+        return caches.match(event.request);
+      })
   );
 });
 
-self.addEventListener("activate", event => {
+// Activate event - clean old caches
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(key => key !== CACHE_NAME && caches.delete(key))
-    ))
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
   );
   self.clients.claim();
 });
