@@ -1,0 +1,388 @@
+/* assets/css/style.css (updated - removed icon selector styles, kept clean) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+body {
+  background: #eef2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* phone container */
+.phone {
+  width: 380px;
+  max-width: 100%;
+  background: white;
+  border-radius: 36px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35);
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s;
+}
+
+/* header */
+.header {
+  background: linear-gradient(135deg, #ddd4ff, #ede7ff);
+  padding: 22px 20px 18px 20px;
+  position: relative;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.menu-icon {
+  font-size: 26px;
+  cursor: pointer;
+  width: 32px;
+  color: #2d3a6e;
+}
+
+.add-area {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.add-area:active {
+  transform: scale(0.96);
+}
+
+.add-circle {
+  width: 48px;
+  height: 48px;
+  background: #7b6cf6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 400;
+  margin-left: auto;
+  margin-bottom: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.add-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3c2f7a;
+  letter-spacing: 0.3px;
+}
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  margin-top: 12px;
+  color: #1a2342;
+  letter-spacing: -0.5px;
+}
+
+.user-greeting {
+  text-align: center;
+  font-size: 13px;
+  color: #5a4eb0;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* content scrolling */
+.content {
+  flex: 1;
+  padding: 20px 16px 24px;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #1e2a47;
+}
+
+.badge-count {
+  background: #e9eef3;
+  padding: 4px 10px;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2c3e66;
+}
+
+/* card styles - NO FOOTER */
+.card {
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 18px;
+  background: #f5f8ff;
+  transition: all 0.2s;
+  border: 1px solid rgba(123, 108, 246, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card.green {
+  background: #eafaf0;
+  border-left: 4px solid #2b8c5e;
+}
+
+.card.yellow {
+  background: #fff8e7;
+  border-left: 4px solid #e6a017;
+}
+
+.card.blue {
+  background: #f0f4ff;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: #e4e9fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.card.green .icon {
+  background: #d4f0e2;
+}
+
+.card.yellow .icon {
+  background: #ffefc0;
+}
+
+.details {
+  flex: 1;
+}
+
+.date {
+  font-weight: 800;
+  font-size: 16px;
+  color: #0b1a38;
+  margin-bottom: 4px;
+}
+
+.time {
+  font-size: 13.5px;
+  color: #4a5a7a;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doctor {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2a46;
+}
+
+.notes {
+  font-size: 12px;
+  color: #6f7c9b;
+  margin-top: 4px;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.arrow-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: 0.1s;
+  border: none;
+}
+
+.arrow-btn:active {
+  background: #f0f0f0;
+  transform: scale(0.94);
+}
+
+.delete-icon {
+  cursor: pointer;
+  font-size: 18px;
+  background: rgba(0, 0, 0, 0.05);
+  width: 32px;
+  height: 32px;
+  border-radius: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.1s;
+}
+
+.delete-icon:active {
+  background: #ffdede;
+}
+
+/* empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fafcff;
+  border-radius: 40px;
+  margin-top: 20px;
+}
+
+.empty-emoji {
+  font-size: 62px;
+  margin-bottom: 12px;
+}
+
+/* modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-card {
+  background: white;
+  width: 340px;
+  max-width: 85%;
+  border-radius: 36px;
+  padding: 28px 24px;
+  box-shadow: 0 30px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h3 {
+  font-size: 24px;
+  margin-bottom: 18px;
+  color: #1f2a44;
+  text-align: center;
+}
+
+.modal-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.modal-card input, .modal-card select, .modal-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid #cdd9ed;
+  border-radius: 30px;
+  font-size: 15px;
+  background: #fefefe;
+  font-family: inherit;
+}
+
+.modal-card textarea {
+  border-radius: 20px;
+  resize: vertical;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border-radius: 40px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+.save-btn {
+  background: #7b6cf6;
+  color: white;
+}
+
+.cancel-btn {
+  background: #eef2f9;
+  color: #2c3e66;
+}
+
+.error-msg {
+  color: #e5484d;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.loader-placeholder {
+  text-align: center;
+  padding: 40px;
+  color: #8e9bb5;
+}
+
+/* past appointments section */
+.past-section {
+  margin-top: 28px;
+  opacity: 0.7;
+}
+
+.past-section .section-title {
+  font-size: 16px;
+  color: #8e9bb5;
+}
+
+/* responsive touches */
+@media (max-width: 450px) {
+  .phone {
+    height: 100vh;
+    border-radius: 0;
+  }
+  body {
+    padding: 0;
+  }
+}
