@@ -1,17 +1,14 @@
-<!-- index.html (updated - removed icon selector from appointment modal) -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Mis Citas · Recordatorio seguro</title>
-  <meta name="description" content="Agenda de citas con cifrado local, PIN y PWA">
-  <link rel="manifest" href="manifest.json">
+  <title>Mis Citas</title>
+  <meta name="description" content="Agenda de citas simple">
   <meta name="theme-color" content="#7b6cf6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mis Citas">
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -27,47 +24,30 @@
     </div>
 
     <div class="content" id="appointmentsList">
-      <!-- dynamic content -->
-      <div class="loader-placeholder">Cargando agenda segura...</div>
+      <div class="loader-placeholder">Cargando agenda...</div>
     </div>
   </div>
 
-  <!-- MODAL: Setup (first run) -->
-  <div id="setupModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card setup-card">
-      <div class="modal-icon">🔐✨</div>
-      <h3>Configura tu agenda segura</h3>
-      <input type="text" id="setupName" placeholder="Tu nombre" autocomplete="off">
-      <input type="password" id="setupPin" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="PIN de 4 dígitos">
-      <input type="password" id="setupConfirmPin" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="Confirmar PIN">
+  <!-- MODAL: Name (first run) -->
+  <div id="nameModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon">👋✨</div>
+      <h3>Bienvenida</h3>
+      <input type="text" id="userName" placeholder="Tu nombre" autocomplete="off">
       <div class="modal-buttons">
-        <button id="setupConfirmBtn" class="save-btn">Comenzar</button>
+        <button id="saveNameBtn" class="save-btn">Comenzar</button>
       </div>
-      <div class="error-msg" id="setupError"></div>
+      <div class="error-msg" id="nameError"></div>
     </div>
   </div>
 
-  <!-- MODAL: Login (PIN) -->
-  <div id="loginModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card login-card">
-      <div class="modal-icon">📅🔒</div>
-      <h3 id="loginGreeting">Bienvenido</h3>
-      <input type="password" id="loginPin" maxlength="4" inputmode="numeric" pattern="\d*" placeholder="PIN de 4 dígitos" autocomplete="off">
-      <div class="modal-buttons">
-        <button id="loginBtn" class="save-btn">Acceder</button>
-        <button id="resetAppBtn" class="cancel-btn">Reiniciar app</button>
-      </div>
-      <div class="error-msg" id="loginError"></div>
-    </div>
-  </div>
-
-  <!-- MODAL: Appointment form (create / edit) - SIMPLIFIED, no icon selector -->
+  <!-- MODAL: Appointment form -->
   <div id="appointmentModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card appoint-card">
+    <div class="modal-card">
       <h3 id="appModalTitle">➕ Nueva cita</h3>
-      <input type="text" id="appTitle" placeholder="Motivo / título *" autocomplete="off">
-      <input type="text" id="appDoctor" placeholder="Doctor / Centro" autocomplete="off">
-      <textarea id="appNotes" rows="3" placeholder="Notas / apuntes (opcional)"></textarea>
+      <input type="text" id="appTitle" placeholder="Motivo De Cita*" autocomplete="off">
+      <input type="text" id="appDoctor" placeholder="Lugar" autocomplete="off">
+      <textarea id="appNotes" rows="3" placeholder="Descripcion(opcional)"></textarea>
       <input type="date" id="appDate">
       <input type="time" id="appTime">
       <div class="modal-buttons">
@@ -77,21 +57,6 @@
     </div>
   </div>
 
-  <script src="assets/js/security.js"></script>
   <script src="assets/js/app.js"></script>
-  <script src="assets/js/main.js"></script>
-
-  <script>
-    // register service worker for PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-          console.log('✅ SW registrado:', reg.scope);
-        }).catch(err => {
-          console.log('❌ SW error:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

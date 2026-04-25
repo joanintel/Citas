@@ -1,230 +1,278 @@
-// assets/js/app.js
-/**
- * Appointment Manager - handles CRUD, sorting (closest first), and rendering
- * Works with decrypted in-memory data; calls back to main for encrypted storage.
- */
-
-class AppointmentManager {
-  constructor(onDataChanged) {
-    this.appointments = [];       // decrypted appointments in memory
-    this.onDataChanged = onDataChanged; // callback to save encrypted vault
-  }
-
-  // Load decrypted data into memory (called after login)
-  loadDecryptedData(data) {
-    this.appointments = Array.isArray(data) ? data : [];
-    this.sortAppointments();
-    this.render();
-  }
-
-  // Get active (future & today) appointments only, sorted by closest
-  getActiveAppointments() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+// assets/js/app.js - Clean fixed version, no double events
+(function() {
+  let appointments = [];
+  let userName = "";
+  let currentEditId = null;
+  
+  // Helper for mobile touch + click (prevents double firing)
+  function on(el, handler) {
+    if (!el) return;
+    let isProcessing = false;
     
-    const filtered = this.appointments.filter(app => {
-      if (!app.dateRaw) return false;
-      const appDate = new Date(app.dateRaw);
-      appDate.setHours(0, 0, 0, 0);
-      return appDate >= today;
-    });
+    const wrappedHandler = function(e) {
+      e.preventDefault();
+      if (isProcessing) return;
+      isProcessing = true;
+      handler(e);
+      setTimeout(() => { isProcessing = false; }, 300);
+    };
     
-    // sort by date ascending (closest first)
-    filtered.sort((a, b) => {
-      if (!a.dateRaw) return 1;
-      if (!b.dateRaw) return -1;
-      return a.dateRaw.localeCompare(b.dateRaw);
-    });
-    
-    return filtered;
+    el.removeEventListener('click', wrappedHandler);
+    el.removeEventListener('touchstart', wrappedHandler);
+    el.addEventListener('click', wrappedHandler);
+    el.addEventListener('touchstart', wrappedHandler);
   }
   
-  // Past appointments (optional for extra section)
-  getPastAppointments() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  function loadData() {
+    let savedName = localStorage.getItem('mis_citas_name');
+    let savedApps = localStorage.getItem('mis_citas_appointments');
     
-    const past = this.appointments.filter(app => {
-      if (!app.dateRaw) return false;
-      const appDate = new Date(app.dateRaw);
-      appDate.setHours(0, 0, 0, 0);
-      return appDate < today;
-    });
-    past.sort((a, b) => b.dateRaw.localeCompare(a.dateRaw)); // recent past first
-    return past;
-  }
-
-  sortAppointments() {
-    // simple in-place sort reference
-    this.appointments.sort((a, b) => {
-      if (!a.dateRaw) return 1;
-      if (!b.dateRaw) return -1;
-      return a.dateRaw.localeCompare(b.dateRaw);
-    });
-  }
-
-  addAppointment(appointment) {
-    const newId = Date.now().toString() + '-' + Math.random().toString(36).substr(2, 6);
-    const newApp = {
-      id: newId,
-      title: appointment.title || "Cita",
-      doctorName: appointment.doctorName || "",
-      notes: appointment.notes || "",
-      dateRaw: appointment.dateRaw,
-      time: appointment.time || "12:00 PM",
-      icon: appointment.icon || "📅",
-      category: this._getCategoryFromIcon(appointment.icon || "📅")
-    };
-    this.appointments.push(newApp);
-    this.sortAppointments();
-    this.render();
-    if (this.onDataChanged) this.onDataChanged(this.appointments);
-    return newApp;
-  }
-
-  updateAppointment(id, updatedFields) {
-    const index = this.appointments.findIndex(a => a.id === id);
-    if (index !== -1) {
-      this.appointments[index] = {
-        ...this.appointments[index],
-        title: updatedFields.title !== undefined ? updatedFields.title : this.appointments[index].title,
-        doctorName: updatedFields.doctorName !== undefined ? updatedFields.doctorName : this.appointments[index].doctorName,
-        notes: updatedFields.notes !== undefined ? updatedFields.notes : this.appointments[index].notes,
-        dateRaw: updatedFields.dateRaw || this.appointments[index].dateRaw,
-        time: updatedFields.time || this.appointments[index].time,
-        icon: updatedFields.icon || this.appointments[index].icon,
-        category: this._getCategoryFromIcon(updatedFields.icon || this.appointments[index].icon)
-      };
-      this.sortAppointments();
-      this.render();
-      if (this.onDataChanged) this.onDataChanged(this.appointments);
+    if (savedName) {
+      userName = savedName;
+      const greeting = document.getElementById('userGreeting');
+      if (greeting) greeting.innerText = '👋 Hola, ' + userName;
+      
+      if (savedApps) {
+        appointments = JSON.parse(savedApps);
+      } else {
+        appointments = [];
+      }
+      
+      const nameModal = document.getElementById('nameModal');
+      if (nameModal) nameModal.style.display = 'none';
+      render();
       return true;
+    } else {
+      const nameModal = document.getElementById('nameModal');
+      if (nameModal) nameModal.style.display = 'flex';
+      return false;
     }
-    return false;
   }
-
-  deleteAppointment(id) {
-    this.appointments = this.appointments.filter(a => a.id !== id);
-    this.sortAppointments();
-    this.render();
-    if (this.onDataChanged) this.onDataChanged(this.appointments);
+  
+  function saveData() {
+    localStorage.setItem('mis_citas_name', userName);
+    localStorage.setItem('mis_citas_appointments', JSON.stringify(appointments));
   }
-
-  _getCategoryFromIcon(icon) {
-    if (icon === '🦷') return 'dental';
-    if (icon === '❤️') return 'heart';
-    return 'general';
+  
+  // Save name button - CLEAN
+  const saveNameBtn = document.getElementById('saveNameBtn');
+  if (saveNameBtn) {
+    // Remove any existing listeners by cloning
+    const newSaveBtn = saveNameBtn.cloneNode(true);
+    saveNameBtn.parentNode.replaceChild(newSaveBtn, saveNameBtn);
+    
+    on(newSaveBtn, function(e) {
+      e.stopPropagation();
+      let name = document.getElementById('userName').value.trim();
+      let error = document.getElementById('nameError');
+      
+      if (!name) { 
+        if (error) error.innerText = "Ingresa tu nombre"; 
+        return; 
+      }
+      
+      userName = name;
+      saveData();
+      
+      const greeting = document.getElementById('userGreeting');
+      if (greeting) greeting.innerText = '👋 Hola, ' + name;
+      
+      const nameModal = document.getElementById('nameModal');
+      if (nameModal) nameModal.style.display = 'none';
+      render();
+    });
   }
-
-  // Helper: format date for UI
-  formatDateFromRaw(dateRaw) {
-    if (!dateRaw) return "Fecha no definida";
-    const parts = dateRaw.split("-");
-    if (parts.length === 3) {
-      const [year, month, day] = parts;
-      const dateObj = new Date(year, month-1, day);
-      return dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase());
+  
+  // Add button - CLEAN
+  const addBtn = document.getElementById('openAddBtn');
+  if (addBtn) {
+    const newAddBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+    
+    on(newAddBtn, function(e) {
+      e.stopPropagation();
+      currentEditId = null;
+      const modalTitle = document.getElementById('appModalTitle');
+      const titleInput = document.getElementById('appTitle');
+      const doctorInput = document.getElementById('appDoctor');
+      const notesInput = document.getElementById('appNotes');
+      const dateInput = document.getElementById('appDate');
+      const timeInput = document.getElementById('appTime');
+      
+      if (modalTitle) modalTitle.innerText = '➕ Nueva cita';
+      if (titleInput) titleInput.value = '';
+      if (doctorInput) doctorInput.value = '';
+      if (notesInput) notesInput.value = '';
+      if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+      if (timeInput) timeInput.value = '10:00';
+      
+      const appModal = document.getElementById('appointmentModal');
+      if (appModal) appModal.style.display = 'flex';
+    });
+  }
+  
+  // Cancel modal - CLEAN
+  const cancelBtn = document.getElementById('modalCancelBtn');
+  if (cancelBtn) {
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    on(newCancelBtn, function(e) {
+      e.stopPropagation();
+      const appModal = document.getElementById('appointmentModal');
+      if (appModal) appModal.style.display = 'none';
+    });
+  }
+  
+  // Save appointment - CLEAN
+  const saveBtn = document.getElementById('modalSaveBtn');
+  if (saveBtn) {
+    const newSaveBtn = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+    
+    on(newSaveBtn, function(e) {
+      e.stopPropagation();
+      let title = document.getElementById('appTitle').value.trim();
+      if (!title) { 
+        alert("El título es obligatorio"); 
+        return; 
+      }
+      
+      let doctor = document.getElementById('appDoctor').value.trim() || "Consultorio";
+      let notes = document.getElementById('appNotes').value.trim();
+      let date = document.getElementById('appDate').value;
+      if (!date) { 
+        alert("Selecciona una fecha"); 
+        return; 
+      }
+      let time = document.getElementById('appTime').value;
+      
+      let app = {
+        id: currentEditId || Date.now(),
+        title: title,
+        doctor: doctor,
+        notes: notes,
+        date: date,
+        time: time
+      };
+      
+      if (currentEditId) {
+        let index = appointments.findIndex(a => a.id === currentEditId);
+        if (index !== -1) appointments[index] = app;
+      } else {
+        appointments.push(app);
+      }
+      
+      saveData();
+      const appModal = document.getElementById('appointmentModal');
+      if (appModal) appModal.style.display = 'none';
+      render();
+    });
+  }
+  
+  window.editApp = function(id) {
+    let app = appointments.find(a => a.id === id);
+    if (!app) return;
+    currentEditId = id;
+    const modalTitle = document.getElementById('appModalTitle');
+    const titleInput = document.getElementById('appTitle');
+    const doctorInput = document.getElementById('appDoctor');
+    const notesInput = document.getElementById('appNotes');
+    const dateInput = document.getElementById('appDate');
+    const timeInput = document.getElementById('appTime');
+    
+    if (modalTitle) modalTitle.innerText = '✏️ Editar cita';
+    if (titleInput) titleInput.value = app.title;
+    if (doctorInput) doctorInput.value = app.doctor;
+    if (notesInput) notesInput.value = app.notes || '';
+    if (dateInput) dateInput.value = app.date;
+    if (timeInput) timeInput.value = app.time;
+    
+    const appModal = document.getElementById('appointmentModal');
+    if (appModal) appModal.style.display = 'flex';
+  };
+  
+  window.deleteApp = function(id) {
+    if (confirm("¿Eliminar esta cita?")) {
+      appointments = appointments.filter(a => a.id !== id);
+      saveData();
+      render();
     }
-    return dateRaw;
-  }
-
-  // Render the whole UI (active + past optional)
-  render() {
-    const container = document.getElementById("appointmentsList");
+  };
+  
+  function render() {
+    let container = document.getElementById('appointmentsList');
     if (!container) return;
     
-    const active = this.getActiveAppointments();
-    const past = this.getPastAppointments();
+    let today = new Date().toISOString().split('T')[0];
     
-    if (this.appointments.length === 0) {
+    let future = appointments.filter(a => a.date >= today).sort((a,b) => a.date.localeCompare(b.date));
+    let past = appointments.filter(a => a.date < today).sort((a,b) => b.date.localeCompare(a.date));
+    
+    if (appointments.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-emoji">📆✨</div>
+          <div class="empty-emoji">📅✨</div>
           <div class="section-title" style="margin-bottom: 8px;">No hay citas</div>
-          <p style="color: #6c7a9e; font-size: 14px;">Toca "+ Nueva cita" para recordar tus eventos</p>
+          <p style="color: #6c7a9e; font-size: 14px;">Toca "+ Nueva cita" para agregar</p>
         </div>
       `;
       return;
     }
     
-    let html = `
-      <div class="section-header">
-        <div class="section-title">Próximas citas</div>
-        <div class="badge-count">${active.length}</div>
-      </div>
-    `;
+    let html = '';
     
-    if (active.length === 0 && past.length > 0) {
-      html += `<div class="empty-state" style="padding:20px;"><div class="empty-emoji">✅</div><p style="color:#6c7a9e;">No hay citas próximas. ¡Todas están en el pasado!</p></div>`;
-    } else {
-      active.forEach(app => {
-        html += this._renderCard(app);
-      });
+    if (future.length > 0) {
+      html += `
+        <div class="section-header">
+          <div class="section-title">Próximas citas</div>
+          <div class="badge-count">${future.length}</div>
+        </div>
+      `;
+      future.forEach(app => { html += renderCard(app); });
     }
     
     if (past.length > 0) {
-      html += `<div class="past-section"><div class="section-header" style="margin-top: 16px;"><div class="section-title">Historial / Pasadas</div><div class="badge-count">${past.length}</div></div>`;
-      past.forEach(app => {
-        html += this._renderCard(app, true);
-      });
+      html += `<div class="past-section">`;
+      html += `
+        <div class="section-header" style="margin-top: 16px;">
+          <div class="section-title">Historial / Pasadas</div>
+          <div class="badge-count">${past.length}</div>
+        </div>
+      `;
+      past.forEach(app => { html += renderCard(app, true); });
       html += `</div>`;
     }
     
     container.innerHTML = html;
-    
-    // attach event listeners
-    document.querySelectorAll('.edit-appointment').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-id');
-        this._triggerEdit(id);
-      });
-    });
-    document.querySelectorAll('.delete-icon').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-id');
-        if (confirm("¿Eliminar esta cita?")) {
-          this.deleteAppointment(id);
-        }
-      });
-    });
   }
   
-  _renderCard(app, isPast = false) {
-    const formattedDate = this.formatDateFromRaw(app.dateRaw);
-    const cardClass = this._getCardClass(app);
-    const iconEmoji = app.icon || "📅";
-    const displayDoctor = app.doctorName || "Profesional";
-    const notesPreview = app.notes ? app.notes.substring(0, 60) : "";
-    const opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
+  function renderCard(app, isPast = false) {
+    let d = new Date(app.date);
+    let formatted = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+    let opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
     
     return `
-      <div class="card ${cardClass}" data-id="${app.id}" ${opacityStyle}>
+      <div class="card blue" data-id="${app.id}" ${opacityStyle}>
         <div class="card-row">
-          <div class="icon">${iconEmoji}</div>
+          <div class="icon">📅</div>
           <div class="details">
-            <div class="date">${formattedDate}</div>
+            <div class="date">${formatted}</div>
             <div class="time">⏰ ${app.time || "12:00"}</div>
-            <div class="doctor">👤 ${this._escapeHtml(displayDoctor)}</div>
-            ${notesPreview ? `<div class="notes">📝 ${this._escapeHtml(notesPreview)}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
+            <div class="doctor">👤 ${escapeHtml(app.doctor)}</div>
+            <div class="card-title" style="font-weight: bold; margin-top: 8px; font-size: 16px; color: #1a2342;">${escapeHtml(app.title)}</div>
+            ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
           </div>
           <div class="card-actions">
-            <div class="arrow-btn edit-appointment" data-id="${app.id}" title="Editar">✎</div>
-            <div class="delete-icon" data-id="${app.id}" title="Eliminar">🗑️</div>
+            <div class="arrow-btn edit-btn-colored" onclick="editApp(${app.id})" title="Editar">✎</div>
+            <div class="delete-icon delete-btn-colored" onclick="deleteApp(${app.id})" title="Eliminar">🗑️</div>
           </div>
         </div>
       </div>
     `;
   }
   
-  _getCardClass(app) {
-    if (app.category === 'dental') return 'green';
-    if (app.category === 'heart') return 'yellow';
-    return 'blue';
-  }
-  
-  _escapeHtml(str) {
+  function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
       if (m === '&') return '&amp;';
@@ -234,14 +282,17 @@ class AppointmentManager {
     });
   }
   
-  _triggerEdit(id) {
-    const app = this.appointments.find(a => a.id === id);
-    if (app && window.appModule && window.appModule.openEditModal) {
-      window.appModule.openEditModal(app);
-    } else {
-      console.warn("Edit modal not ready");
-    }
+  // Menu info button
+  const menuBtn = document.getElementById('menuInfoBtn');
+  if (menuBtn) {
+    const newMenuBtn = menuBtn.cloneNode(true);
+    menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+    
+    on(newMenuBtn, function() {
+      alert(`📋 Mis Citas\nUsuario: ${userName || "invitado"}\nCitas guardadas: ${appointments.length}`);
+    });
   }
-}
-
-window.AppointmentManager = AppointmentManager;
+  
+  // Start the app
+  loadData();
+})();

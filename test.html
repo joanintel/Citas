@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <style>
+        button { padding: 20px; font-size: 20px; margin: 10px; }
+        input { padding: 15px; font-size: 18px; margin: 10px; width: 200px; }
+        body { background: white; }
+    </style>
+</head>
+<body>
+    <div id="status">Ready</div>
+    <input type="text" id="name" placeholder="Name">
+    <input type="password" id="pin" maxlength="4" placeholder="PIN">
+    <button id="btn">Save</button>
+
+    <script>
+        function saveData() {
+            var name = document.getElementById('name').value;
+            var pin = document.getElementById('pin').value;
+            localStorage.setItem('name', name);
+            localStorage.setItem('pin', pin);
+            document.getElementById('status').innerHTML = 'Saved: ' + name + ' with PIN ' + pin;
+            alert('Saved!');
+        }
+        
+        var btn = document.getElementById('btn');
+        btn.addEventListener('click', saveData);
+        btn.addEventListener('touchstart', saveData);
+        
+        if (localStorage.getItem('name')) {
+            document.getElementById('status').innerHTML = 'Welcome back ' + localStorage.getItem('name');
+        }
+    </script>
+</body>
+</html>
