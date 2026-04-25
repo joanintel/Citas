@@ -249,7 +249,7 @@
     if (appointments.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-emoji">📅✨</div>
+          <div class="empty-emoji">🗓️✨</div>
           <div class="section-title" style="margin-bottom: 8px;">No hay citas</div>
           <p style="color: #6c7a9e; font-size: 14px;">Toca "+ Nueva cita" para agregar</p>
         </div>
@@ -284,37 +284,52 @@
     container.innerHTML = html;
   }
   
-  function renderCard(app, isPast = false) {
-    let d = new Date(app.date);
-    let formatted = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
-    let opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
-    
-    let cardClass = 'blue';
-    if (app.title.toLowerCase().includes('dentista') || app.title.toLowerCase().includes('dental')) {
-      cardClass = 'green';
-    } else if (app.title.toLowerCase().includes('corazón') || app.title.toLowerCase().includes('cardiologia')) {
-      cardClass = 'yellow';
-    }
-    
-    return `
-      <div class="card ${cardClass}" data-id="${app.id}" ${opacityStyle}>
-        <div class="card-row">
-          <div class="icon">📅</div>
-          <div class="details">
-            <div class="date">${formatted}</div>
-            <div class="time">⏰ ${app.time || "12:00"}</div>
-            <div class="doctor">👤 ${escapeHtml(app.doctor)}</div>
-            <div class="card-title">${escapeHtml(app.title)}</div>
-            ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
-          </div>
-          <div class="card-actions">
-            <div class="arrow-btn edit-btn-colored" onclick="editApp(${app.id})" title="Editar">✎</div>
-            <div class="delete-icon delete-btn-colored" onclick="deleteApp(${app.id})" title="Eliminar">🗑️</div>
-          </div>
+
+
+function renderCard(app, isPast = false) {
+  // Crear fecha asegurando zona horaria local
+  let dateParts = app.date.split('-');
+  let d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+  
+  // Formateo manual en español para garantizar idioma
+  const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  
+  let diaSemana = diasSemana[d.getDay()];
+  let diaNumero = d.getDate();
+  let mes = meses[d.getMonth()];
+  
+  let formatted = `${diaSemana}, ${diaNumero} de ${mes}`;
+  let opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
+  
+  let cardClass = 'blue';
+  if (app.title.toLowerCase().includes('dentista') || app.title.toLowerCase().includes('dental')) {
+    cardClass = 'green';
+  } else if (app.title.toLowerCase().includes('corazón') || app.title.toLowerCase().includes('cardiologia')) {
+    cardClass = 'yellow';
+  }
+  
+  return `
+    <div class="card ${cardClass}" data-id="${app.id}" ${opacityStyle}>
+      <div class="card-row">
+        <div class="icon">🗓️</div>
+        <div class="details">
+          <div class="date">${formatted}</div>
+          <div class="time">⏰ ${app.time || "12:00"}</div>
+          <div class="doctor">📌 ${escapeHtml(app.doctor)}</div>
+          <div class="card-title">${escapeHtml(app.title)}</div>
+          ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
+        </div>
+        <div class="card-actions">
+          <div class="arrow-btn edit-btn-colored" onclick="editApp(${app.id})" title="Editar">✎</div>
+          <div class="delete-icon delete-btn-colored" onclick="deleteApp(${app.id})" title="Eliminar">🗑️</div>
         </div>
       </div>
-    `;
-  }
+    </div>
+  `;
+}
+
+
   
   function escapeHtml(str) {
     if (!str) return '';
