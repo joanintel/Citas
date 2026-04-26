@@ -40,6 +40,12 @@
             <span class="slider"></span>
           </label>
         </div>
+     
+       <div class="menu-item" id="calendarOption">
+       <span>🗓️ Calendario</span>
+       <span class="arrow-right">›</span>
+       </div>
+
       </div>
     </div>
 
@@ -76,6 +82,41 @@
       </div>
     </div>
   </div>
+
+<!-- MODAL: Calendar -->
+<div id="calendarModal" class="modal-overlay" style="display: none;">
+  <div class="modal-card calendar-modal">
+    <div class="calendar-header">
+      <button id="prevMonthBtn" class="calendar-nav">‹</button>
+      <h3 id="calendarMonthYear"></h3>
+      <button id="nextMonthBtn" class="calendar-nav">›</button>
+      <button id="closeCalendarBtn" class="close-calendar">✕</button>
+    </div>
+    <div class="calendar-weekdays">
+      <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+    </div>
+    <div id="calendarDaysGrid" class="calendar-days"></div>
+  </div>
+</div>
+
+<!-- MODAL: View Appointment (read only) -->
+<div id="viewAppointmentModal" class="modal-overlay" style="display: none;">
+  <div class="modal-card view-modal">
+    <button id="closeViewModalBtn" class="close-view-modal">✕</button>
+    <div class="view-icon">📋</div>
+    <h3 id="viewTitle"></h3>
+    <div class="view-details">
+      <div class="view-row">🗓️ <span id="viewDate"></span></div>
+      <div class="view-row">⏰ <span id="viewTime"></span></div>
+      <div class="view-row">📍 <span id="viewDoctor"></span></div>
+      <div class="view-row notes-row">📝 <span id="viewNotes"></span></div>
+    </div>
+    <div class="modal-buttons">
+      <button id="editFromViewBtn" class="save-btn">✏️ Editar</button>
+      <button id="closeViewBtn" class="cancel-btn">Cerrar</button>
+    </div>
+  </div>
+</div>
 
   <script src="assets/js/app.js"></script>
 </body>
