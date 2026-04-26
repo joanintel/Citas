@@ -335,7 +335,7 @@ function renderCard(app, isPast = false) {
         <div class="icon">🗓️</div>
         <div class="details">
           <div class="date">${formatted}</div>
-          <div class="time">⏰ ${app.time || "12:00"}</div>
+          <div class="time">⏰ ${formatTimeWithAMPM(app.time)}</div>
           <div class="doctor">📌 ${escapeHtml(app.doctor)}</div>
           <div class="card-title">${escapeHtml(app.title)}</div>
           ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
@@ -482,7 +482,7 @@ function renderCard(app, isPast = false) {
           transition: transform 0.1s;
         ">
           <div style="font-weight: bold;">${escapeHtml(app.title)}</div>
-          <div style="font-size: 13px; opacity: 0.8;">⏰ ${app.time || '--:--'} | 📍 ${escapeHtml(app.doctor)}</div>
+          <div style="font-size: 13px; opacity: 0.8;">⏰ ${formatTimeWithAMPM(app.time)} | 📍 ${escapeHtml(app.doctor)}</div>
         </div>
       `;
     });
@@ -531,6 +531,8 @@ function renderCard(app, isPast = false) {
     }
   }
   
+
+
   function showViewAppointmentModal(app) {
     selectedAppointmentForView = app;
     const modal = document.getElementById('viewAppointmentModal');
@@ -538,11 +540,27 @@ function renderCard(app, isPast = false) {
     
     document.getElementById('viewTitle').innerText = app.title;
     document.getElementById('viewDate').innerText = formatDateSpanish(app.date);
-    document.getElementById('viewTime').innerText = app.time || 'No especificada';
+    document.getElementById('viewTime').innerText = formatTimeWithAMPM(app.time);
     document.getElementById('viewDoctor').innerText = app.doctor || 'No especificado';
     document.getElementById('viewNotes').innerText = app.notes || 'Sin notas';
     
     modal.style.display = 'flex';
+  }
+
+
+
+  function formatTimeWithAMPM(timeStr) {
+    if (!timeStr) return 'No especificada';
+    
+    let [hours, minutes] = timeStr.split(':');
+    hours = parseInt(hours);
+    let period = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convertir a formato 12 horas
+    let hours12 = hours % 12;
+    if (hours12 === 0) hours12 = 12;
+    
+    return `${hours12}:${minutes} ${period}`;
   }
   
   function formatDateSpanish(dateStr) {
