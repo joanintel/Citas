@@ -286,12 +286,33 @@
   
 
 
+function getUrgencyColor(dateStr, isPast) {
+  if (isPast) return 'gray';
+  
+  let today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let dateParts = dateStr.split('-');
+  let appointmentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+  appointmentDate.setHours(0, 0, 0, 0);
+  
+  let diffTime = appointmentDate - today;
+  let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'red';
+  if (diffDays === 1) return 'orange';
+  if (diffDays <= 3) return 'yellow';
+  if (diffDays <= 7) return 'green';
+  return 'blue';
+}
+
+
 function renderCard(app, isPast = false) {
-  // Crear fecha asegurando zona horaria local
+  // Create date properly
   let dateParts = app.date.split('-');
   let d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
   
-  // Formateo manual en español para garantizar idioma
+  // Spanish formatting
   const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   
@@ -300,23 +321,18 @@ function renderCard(app, isPast = false) {
   let mes = meses[d.getMonth()];
   
   let formatted = `${diaSemana}, ${diaNumero} de ${mes}`;
-  let opacityStyle = isPast ? 'style="opacity:0.7;"' : '';
   
-  let cardClass = 'blue';
-  if (app.title.toLowerCase().includes('dentista') || app.title.toLowerCase().includes('dental')) {
-    cardClass = 'green';
-  } else if (app.title.toLowerCase().includes('corazón') || app.title.toLowerCase().includes('cardiologia')) {
-    cardClass = 'yellow';
-  }
+  // Get color based on urgency
+  let cardClass = getUrgencyColor(app.date, isPast);
   
   return `
-    <div class="card ${cardClass}" data-id="${app.id}" ${opacityStyle}>
+    <div class="card ${cardClass}" data-id="${app.id}" style="${isPast ? 'opacity:0.7;' : ''}">
       <div class="card-row">
-        <div class="icon">🗓️</div>
+        <div class="icon">📅</div>
         <div class="details">
           <div class="date">${formatted}</div>
           <div class="time">⏰ ${app.time || "12:00"}</div>
-          <div class="doctor">📌 ${escapeHtml(app.doctor)}</div>
+          <div class="doctor">👤 ${escapeHtml(app.doctor)}</div>
           <div class="card-title">${escapeHtml(app.title)}</div>
           ${app.notes ? `<div class="notes">📝 ${escapeHtml(app.notes.substring(0, 60))}${app.notes.length > 60 ? '…' : ''}</div>` : ''}
         </div>
@@ -328,7 +344,6 @@ function renderCard(app, isPast = false) {
     </div>
   `;
 }
-
 
   
   function escapeHtml(str) {
