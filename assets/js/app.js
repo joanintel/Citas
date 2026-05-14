@@ -611,6 +611,19 @@ function renderCard(app, isPast = false) {
     });
   }
   
+
+
+
+  // Menu privacy policy option
+  const privacyOption = document.getElementById('privacyOption');
+  if (privacyOption) {
+    on(privacyOption, function(e) {
+      e.stopPropagation();
+      if (typeof window.closeMenu === 'function') window.closeMenu();
+      // Open your GitHub page (replace with your actual URL)
+      window.open('https://joanintel.github.io/Citas/privacy.html', '_blank');
+    });
+  }
   // Calendar navigation
   const prevBtn = document.getElementById('prevMonthBtn');
   const nextBtn = document.getElementById('nextMonthBtn');

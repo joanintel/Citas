@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mis Citas</string>
+    <string name="title_activity_main">Mis Citas</string>
+    <string name="package_name">com.miscitas.app</string>
+    <string name="custom_url_scheme">com.miscitas.app</string>
+</resources>
